@@ -1,13 +1,11 @@
-export async function GET(request: Request) {
+export default async function handler(req, res) {
   try {
-    const { searchParams } = new URL(request.url);
-    const clinica = searchParams.get("clinica");
+    const { clinica } = req.query;
 
     if (!clinica) {
-      return new Response(
-        JSON.stringify({ error: "Clinica não informada" }),
-        { status: 400 }
-      );
+      return res.status(400).json({
+        error: "Clinica não informada"
+      });
     }
 
     const url = `https://${clinica}.igutclinicas.com.br/aplicativos/info`;
@@ -21,23 +19,16 @@ export async function GET(request: Request) {
 
     const text = await response.text();
 
-    return new Response(
-      JSON.stringify({
-        status: response.status,
-        ok: response.ok,
-        body: text
-      }),
-      { status: 200 }
-    );
+    return res.status(200).json({
+      status: response.status,
+      ok: response.ok,
+      body: text
+    });
 
-  } catch (error: any) {
-    return new Response(
-      JSON.stringify({
-        error: "Erro interno",
-        details: error.message,
-        stack: error.stack
-      }),
-      { status: 500 }
-    );
+  } catch (error) {
+    return res.status(500).json({
+      error: "Erro interno",
+      details: error.message
+    });
   }
 }
